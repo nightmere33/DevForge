@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'password2', 'email', 'role')
+        fields = ('username', 'password', 'password2', 'email')
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -25,6 +25,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
+        # Public signups are always clients; the developer account is
+        # created with createsuperuser or promoted in the Django admin.
+        validated_data['role'] = 'client'
         user = User.objects.create_user(**validated_data)
         return user
 

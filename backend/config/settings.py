@@ -39,12 +39,43 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+# In development the frontend dev server may run on any localhost port
+if DEBUG:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^http://(localhost|127\.0\.0\.1):\d+$",
+    ]
+
 # REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+# ---- Site / email notifications ----
+SITE_NAME = 'DevForge'
+SITE_URL = os.environ.get('SITE_URL', 'http://localhost:3000')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'DevForge <no-reply@devforge.local>')
+
+if os.environ.get('EMAIL_HOST_USER'):
+    # Production: real SMTP (e.g. Gmail app password or any provider)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+else:
+    # Development: emails are printed to the runserver console
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Application definition
 
@@ -63,7 +94,9 @@ INSTALLED_APPS = [
     'tickets',
     'projects',
     'services',
-    'chat', 
+    'chat',
+    'core',
+    'subscriptions',
 ]
 
 MIDDLEWARE = [
